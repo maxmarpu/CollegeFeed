@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Feed Mockup (Facebook UI)</title>
+    <style>
+        /* ------------------------------------------------ */
+        /* --- 1. CORE VARIABLES & RESET (Light Mode Base) --- */
+        /* ------------------------------------------------ */
+        :root {
+            --bg-primary: #f0f2f5;         /* Main light background (Facebook gray) */
+            --bg-secondary: #ffffff;       /* Card/Sidebar background (White) */
+            --bg-tertiary: #e4e6eb;        /* Input/Hover background */
+            --color-text: #050505;         /* Main text color (Dark) */
+            --color-secondary-text: #606770; /* Secondary text color (Gray) */
+            --color-brand: #1877f2;        /* Primary Blue (Facebook Blue) */
+            --color-success: #38a169;      /* Green */
+            --color-danger: #e02424;       /* Red */
+            --border-radius: 8px;
+            --transition-speed: 0.2s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-primary);
+            color: var(--color-text);
+            overflow: hidden;
+            perspective: 1000px;
+        }
+        
+        /* General scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background-color: var(--color-brand); border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+
+        /* ----------------------------------------------- */
+        /* --- 2. FACEBOOK-STYLE LOGIN/SIGNUP (UPDATED) --- */
+        /* ----------------------------------------------- */
+        
+        #login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--bg-primary);
+        }
+
+        .login-box {
+            background-color: var(--bg-secondary);
+            padding: 25px 30px;
+            border-radius: 8px;
+            width: 350px;
+            text-align: center;
+            
+            /* Soft, light-mode shadow */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .login-box h2 {
+            color: var(--color-brand);
+            margin-bottom: 20px;
+            font-size: 24px;
+            /* Remove aggressive shadow */
+            text-shadow: none;
+        }
+
+        .login-box input {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin-bottom: 15px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            color: var(--color-text);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all var(--transition-speed);
+        }
+        
+        .login-box input:focus {
+            border-color: var(--color-brand);
+            box-shadow: 0 0 0 1px var(--color-brand); /* Subtle border focus */
+            background-color: var(--bg-secondary);
+        }
+        
+        /* --- Buttons (Lighter Shadows, Brighter Colors) --- */
+
+        button {
+            /* Standard button animation reset/refinement */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all var(--transition-speed) ease;
+        }
+        
+        button:active {
+            transform: translateY(1px); /* Subtle press */
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Remove aggressive glow/pseudo elements */
+        button::before { content: none; }
+        button:hover::before { opacity: 0; }
+
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--color-brand);
+        }
+        
+        .login-box button:hover {
+            background-color: #166fe5; /* Slightly darker blue on hover */
+        }
+        
+        /* Switch Button Styling */
+        #switch-auth-btn {
+            color: var(--color-brand);
+            font-size: 14px;
+            font-weight: 500;
+            background: none;
+            box-shadow: none;
+            width: auto;
+            margin-top: 15px;
+        }
+        #switch-auth-btn:hover {
+            text-decoration: underline;
+            color: var(--color-brand);
+        }
+
+        /* ------------------------------------------------ */
+        /* --- 3. MAIN APP LAYOUT & CORE STYLES --- */
+        /* ------------------------------------------------ */
+
+        /* MAIN LAYOUT (Fixed Top Bar, Side Navigation) */
+        #feed-page {
+            display: grid;
+            grid-template-rows: 60px 1fr; /* Fixed header height */
+            grid-template-columns: 250px 1fr; 
+            height: 100vh;
+            overflow: hidden; /* Manage scrolling inside main-content */
+        }
+
+        /* HEADER */
+        #header-bar {
+            grid-column: 1 / span 2;
+            background-color: var(--bg-secondary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        #header-bar h2 {
+            color: var(--color-brand);
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        /* TOGGLE BUTTON (Hidden on fixed Facebook UI) */
+        #toggle-btn { display: none; }
+        
+        /* SIDEBAR (Navigation on the left) */
+        #sidebar {
+            grid-row: 2;
+            background-color: var(--bg-secondary);
+            padding: 10px 0;
+            overflow-y: auto;
+            box-shadow: 1px 0 3px rgba(0, 0, 0, 0.05);
+            border-right: 1px solid var(--bg-tertiary);
+        }
+
+        #sidebar nav a {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            color: var(--color-text);
+            margin: 5px 10px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        #sidebar nav a:hover {
+            background-color: var(--bg-tertiary);
+        }
+        
+        #sidebar nav a.active {
+            background-color: var(--bg-tertiary); /* Highlight active section softly */
+            color: var(--color-brand);
+            font-weight: bold;
+            border-left: 3px solid var(--color-brand); /* Visual accent */
+            padding-left: 12px;
+        }
+
+        /* MAIN CONTENT */
+        #main-content {
+            grid-row: 2;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--bg-primary);
+        }
+        
+        /* --- Card & Content Styles (Soft Shadows) --- */
+        
+        h1 { color: var(--color-text); border-bottom: none; margin-bottom: 20px; font-size: 24px; }
+        
+        .card { 
+            background-color: var(--bg-secondary); 
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); 
+            border: 1px solid var(--bg-tertiary); 
+            transition: box-shadow var(--transition-speed);
+        }
+        
+        /* Remove aggressive post hover */
+        .post.card:hover {
+            transform: none;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
+            border-color: var(--bg-tertiary); 
+        }
+        
+        /* POST BOX REFINEMENT */
+        #post-box {
+            border-left: none; /* Remove dark mode visual accent */
+            padding: 15px;
+            margin-bottom: 30px; 
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        #post-box textarea { 
+            background-color: var(--bg-tertiary); 
+            color: var(--color-text); 
+            padding: 10px;
+            min-height: 50px;
+            border: 1px solid var(--bg-tertiary); 
+            border-radius: 25px; /* Pill input for Facebook feel */
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        #post-box textarea:focus {
+            background-color: var(--bg-secondary);
+        }
+        
+        #post-box button {
+            margin-top: 5px;
+            padding: 6px 15px;
+            border-radius: 6px; 
+            background-color: var(--color-brand);
+            font-size: 14px;
+        }
+
+        /* Post Feed Items */
+        .post-header img, #profile-avatar { border: none; } /* Remove heavy blue border */
+        .post-header img { width: 40px; height: 40px; }
+        .post-header .username { color: var(--color-text); font-weight: 600; }
+        .post-header .time { color: var(--color-secondary-text); font-size: 12px; }
+        .post p { color: var(--color-text); }
+        
+        /* Profile/Settings */
+        #profile-avatar { border: 1px solid var(--bg-tertiary); }
+        .card button.save-btn { background-color: var(--color-brand); }
+        #logout-btn { background-color: var(--color-danger); }
+        .file-upload-label { background-color: var(--color-brand); }
+        #profile-instruction { background-color: #fce8e8; color: var(--color-danger); border: 1px solid var(--color-danger); }
+
+        /* Utility */
+        #home-content, #profile-content, #settings-content {
+             /* Ensure content sections scroll independently of the header/sidebar */
+             padding-top: 0;
+        }
+        
+        /* Removed unnecessary styles for the unused Community section */
+        #community-content { display: none !important; }
+        
+
+    </style>
+</head>
+<body onload="initApp()">
+
+    <div id="login-container">
+        <div class="login-box">
+            <h2 id="auth-header">College Feed Login</h2>
+            
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit" id="login-btn">Log In</button>
+            </form>
+
+            <form id="signup-form">
+                <input type="email" id="signup-email" placeholder="Email (must be unique)" required>
+                <input type="password" id="signup-password" placeholder="Password (min 6 chars)" required>
+                <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required>
+                <button type="submit" id="signup-btn">Create Account</button>
+            </form>
+            
+            <button id="switch-auth-btn">Need an account? Sign Up</button>
+        </div>
+    </div>
+
+    <div id="feed-page">
+        <div id="header-bar">
+            <h2>College Feed</h2>
+            </div>
+
+        <button id="toggle-btn">←</button>
+
+        <div id="sidebar">
+            <nav id="nav-links">
+                <a href="#" data-section="home-content" id="home-nav-link">🏠 Home</a>
+                <a href="#" data-section="profile-content" id="profile-nav-link">👤 Profile</a>
+                <a href="https://onedrive.live.com/" target="_blank">📄 PPapers (OneDrive Link)</a>
+                <a href="#" data-section="settings-content">⚙️ Settings</a>
+            </nav>
+        </div>
+
+        <div id="main-content">
+            <div style="margin-top: 20px;">
+            
+                <div id="home-content" class="content-section">
+                    <h1>Home Feed</h1>
+                    
+                    <div id="post-box" class="card">
+                        <textarea id="post-text" placeholder="What's on your mind?" rows="3"></textarea>
+                        <button id="post-button" style="float: right;">Post</button>
+                        <div style="clear: both;"></div>
+                    </div>
+
+                    <div id="feed-container">
+                        </div>
+                </div>
+                
+                <div id="profile-content" class="content-section">
+                    <h1 id="profile-header">👤 Create Your Profile</h1>
+                    <p id="profile-instruction" style="color: var(--color-danger); font-weight: bold;">Please set your Display Name to access the main feed!</p>
+                    
+                    <div class="card">
+                        <h2>Current Profile</h2>
+                        <img id="profile-avatar" src="https://via.placeholder.com/100/007bff/ffffff?text=U" alt="Profile Picture">
+                        <p>User ID: <strong id="display-uid">...</strong></p>
+                        <p>Email: <strong id="display-email">...</strong></p>
+                        <p>Name: <strong id="display-name"></strong></p>
+                        <button id="logout-btn" class="save-btn" style="float: right;">Log Out</button>
+                        <div style="clear: both;"></div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Update Profile Details</h2>
+                        
+                        <label for="new-name">Change Name:</label>
+                        <input type="text" id="new-name" placeholder="New Display Name">
+                        <p id="name-lock-info" style="font-size: 12px; color: var(--color-danger); margin-bottom: 10px; display: none;">Name change locked for 15 days.</p>
+                        <button id="save-name-btn" class="save-btn">Save Name</button>
+                        <div style="clear: both;"></div>
+                        
+                        <hr style="margin: 20px 0; border-color: var(--bg-tertiary);">
+                        
+                        <label for="profile-pic-upload">Change Picture:</label>
+                        <input type="file" id="profile-pic-upload" accept="image/*">
+                        <label for="profile-pic-upload" class="file-upload-label">Upload New Image</label>
+                        <p style="font-size: 12px; color: var(--color-secondary-text); margin-top: 5px;">(Picture change is temporary)</p>
+                    </div>
+                </div>
+
+
+                <div id="settings-content" class="content-section">
+                    <h1>⚙️ Settings</h1>
+                    
+                    <div id="password-settings" class="card">
+                        <h2>Change Password</h2>
+                        <label for="new-password">New Password (min 6 chars):</label>
+                        <input type="password" id="new-password" placeholder="Enter new password">
+                        <label for="confirm-password">Confirm New Password:</label>
+                        <input type="password" id="confirm-password" placeholder="Confirm new password">
+                        <button id="save-password-btn" class="save-btn">Save Password</button>
+                        <div style="clear: both;"></div>
+                    </div>
+                    
+                    <div id="email-settings" class="card">
+                        <h2>Update Email</h2>
+                        <label for="new-email">New Email:</label>
+                        <input type="email" id="new-email" placeholder="Enter new email address">
+                        <button id="save-email-btn" class="save-btn">Update Email</button>
+                        <div style="clear: both;"></div>
+                    </div>
+                    
+                    <div id="privacy-settings" class="card">
+                        <h2>Privacy Settings</h2>
+                        <div class="privacy-option"> <span>Make profile private:</span> <label class="switch"> <input type="checkbox" id="private-profile"> <span class="slider"></span> </label> </div>
+                        <div class="privacy-option"> <span>Allow mentions in posts:</span> <label class="switch"> <input type="checkbox" id="allow-mentions" checked> <span class="slider"></span> </label> </div>
+                        <div class="privacy-option" style="border-bottom: none;"> <span>Show activity status:</span> <label class="switch"> <input type="checkbox" id="show-status" checked> <span class="slider"></span> </label> </div>
+                        <button id="save-privacy-btn" class="save-btn">Save Changes</button>
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script id="firebase-config">
+        const firebaseConfig = {
+            apiKey: "AIzaSyAncDAx-GTB2xVQGsaIat37JhE57-q04KA",
+            authDomain: "dddd-9927f.firebaseapp.com",
+            projectId: "dddd-9927f",
+            storageBucket: "dddd-9927f.firebasestorage.app",
+            messagingSenderId: "936560453575",
+            appId: "1:936560453575:web:75ab8ee4b4a63194631be2"
+        };
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = app.auth();
+        const db = app.firestore();
+        
+        // Firestore Collections
+        const usersCollection = db.collection('users');
+        const tweetsCollection = db.collection('tweets');
+
+        // --- DOM Elements ---
+        const loginContainer = document.getElementById('login-container');
+        const authHeader = document.getElementById('auth-header');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const switchAuthBtn = document.getElementById('switch-auth-btn');
+        const loginEmailInput = document.getElementById('login-email');
+        const loginPasswordInput = document.getElementById('login-password');
+        const signupEmailInput = document.getElementById('signup-email');
+        const signupPasswordInput = document.getElementById('signup-password');
+        const signupConfirmPasswordInput = document.getElementById('signup-confirm-password');
+
+        const feedPage = document.getElementById('feed-page');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const homeContent = document.getElementById('home-content');
+        const profileContent = document.getElementById('profile-content');
+        const profileHeader = document.getElementById('profile-header');
+        const profileInstruction = document.getElementById('profile-instruction');
+        const feedContainer = document.getElementById('feed-container');
+
+        const navLinks = document.querySelectorAll('#nav-links a');
+        const contentSections = document.querySelectorAll('.content-section');
+        const homeNavLink = document.getElementById('home-nav-link');
+        const profileNavLink = document.getElementById('profile-nav-link');
+        
+        const displayUID = document.getElementById('display-uid');
+        const displayEmail = document.getElementById('display-email');
+        const displayNameElement = document.getElementById('display-name');
+        const newNameInput = document.getElementById('new-name');
+        const saveNameButton = document.getElementById('save-name-btn');
+        const nameLockInfo = document.getElementById('name-lock-info');
+        const profileAvatar = document.getElementById('profile-avatar');
+        const profilePicUpload = document.getElementById('profile-pic-upload');
+        const logoutButton = document.getElementById('logout-btn');
+        const newPasswordInput = document.getElementById('new-password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const savePasswordButton = document.getElementById('save-password-btn');
+        const newEmailInput = document.getElementById('new-email');
+        const saveEmailButton = document.getElementById('save-email-btn');
+        const savePrivacyButton = document.getElementById('save-privacy-btn');
+        const studentListContainer = document.getElementById('student-list');
+
+        // --- State Variables ---
+        let currentUserData = null; // Stores profile data from Firestore
+        const NAME_CHANGE_LOCK_PERIOD = 1296000000; // 15 days in milliseconds
+        const MOCK_AVATAR_URL = 'https://via.placeholder.com/100/007bff/ffffff?text=U';
+
+        // --- Core Functions ---
+
+        async function getUserProfile(uid) {
+            const doc = await usersCollection.doc(uid).get();
+            if (doc.exists) {
+                return doc.data();
+            }
+            return {
+                uid: uid,
+                email: auth.currentUser.email,
+                displayName: null,
+                avatar: MOCK_AVATAR_URL,
+                lastChangeTimestamp: null,
+                isNewUser: true
+            };
+        }
+
+        async function updateProfileDisplay() {
+            if (!auth.currentUser) return;
+
+            currentUserData = await getUserProfile(auth.currentUser.uid);
+
+            displayUID.textContent = auth.currentUser.uid.substring(0, 8) + '...';
+            displayEmail.textContent = auth.currentUser.email;
+            displayNameElement.textContent = currentUserData.displayName || 'Set Name';
+            profileAvatar.src = currentUserData.avatar || MOCK_AVATAR_URL;
+            
+            const isComplete = !!currentUserData.displayName;
+            
+            if (isComplete) {
+                profileHeader.textContent = '👤 Your Profile';
+                profileInstruction.style.display = 'none';
+                updateNameChangeLock();
+            } else {
+                profileHeader.textContent = '👤 Create Your Profile';
+                profileInstruction.style.display = 'block';
+            }
+        }
+        
+        function updateNameChangeLock() {
+            const lastChange = currentUserData.lastChangeTimestamp ? currentUserData.lastChangeTimestamp.toMillis() : null;
+            
+            if (lastChange) {
+                const now = Date.now();
+                const nextChangeTime = lastChange + NAME_CHANGE_LOCK_PERIOD;
+                
+                if (now < nextChangeTime) {
+                    saveNameButton.disabled = true;
+                    newNameInput.disabled = true;
+                    const timeRemaining = nextChangeTime - now;
+                    const days = Math.ceil(timeRemaining / (1000 * 60 * 60 * 24));
+                    nameLockInfo.textContent = `Name change locked for ${days} more days.`;
+                    nameLockInfo.style.display = 'block';
+                    nameLockInfo.style.color = 'var(--color-danger)';
+                } else {
+                    saveNameButton.disabled = false;
+                    newNameInput.disabled = false;
+                    nameLockInfo.style.display = 'block';
+                    nameLockInfo.textContent = `Name change is available.`;
+                    nameLockInfo.style.color = 'var(--color-success)';
+                }
+            } else {
+                saveNameButton.disabled = false;
+                newNameInput.disabled = false;
+                nameLockInfo.style.display = 'none';
+            }
+        }
+
+        // --- Auth State Change Handler ---
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // Adjust layout for main app view
+                loginContainer.style.display = 'none';
+                feedPage.style.display = 'grid';
+                
+                await updateProfileDisplay();
+                
+                // Real-time listener for tweets
+                tweetsCollection.orderBy('timestamp', 'desc').limit(20).onSnapshot(snapshot => {
+                    feedContainer.innerHTML = '';
+                    snapshot.forEach(doc => renderTweet(doc.data()));
+                }, error => console.error("Error setting up tweet listener: ", error));
+
+
+                if (!currentUserData.displayName) {
+                    showSection('profile-content');
+                    profileNavLink.classList.add('active');
+                } else {
+                    showSection('home-content');
+                    homeNavLink.classList.add('active');
+                }
+            } else {
+                // Adjust layout for login/sign up view
+                feedPage.style.display = 'none';
+                loginContainer.style.display = 'flex';
+                currentUserData = null;
+                feedContainer.innerHTML = ''; 
+                showSection('home-content'); 
+            }
+        });
+
+        // --- Firestore: Tweet Handling ---
+
+        function renderTweet(tweet) {
+            const timestampDate = tweet.timestamp && tweet.timestamp.toDate ? tweet.timestamp.toDate() : new Date();
+            const timeString = timestampDate.toLocaleTimeString() + ' ' + timestampDate.toLocaleDateString();
+            
+            const postHTML = `
+                <div class="post card">
+                    <div class="post-header">
+                        <img src="${tweet.avatar || MOCK_AVATAR_URL}" alt="User Avatar">
+                        <span class="username">${tweet.displayName || 'Unknown User'}</span>
+                        <span class="time">${timeString}</span>
+                    </div>
+                    <p>${tweet.content}</p>
+                </div>
+            `;
+            feedContainer.insertAdjacentHTML('beforeend', postHTML); 
+        }
+
+        // --- Event Listeners ---
+
+        // Auth Switcher
+        switchAuthBtn.addEventListener('click', function() {
+            if (loginForm.style.display === 'block') {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'block';
+                authHeader.textContent = 'Create Student Account';
+                switchAuthBtn.textContent = 'Already have an account? Log In';
+            } else {
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+                authHeader.textContent = 'College Feed Login';
+                switchAuthBtn.textContent = 'Need an account? Sign Up';
+            }
+        });
+
+        // Registration Logic
+        signupForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const email = signupEmailInput.value.trim();
+            const password = signupPasswordInput.value;
+            const confirmPass = signupConfirmPasswordInput.value;
+
+            if (password.length < 6) {
+                alert('❌ Error: Password must be at least 6 characters long.');
+                return;
+            }
+            if (password !== confirmPass) {
+                alert('❌ Error: Passwords do not match.');
+                return;
+            }
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                
+                await usersCollection.doc(userCredential.user.uid).set({
+                    email: email,
+                    displayName: null,
+                    avatar: MOCK_AVATAR_URL,
+                    lastChangeTimestamp: null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert('✅ Account created! Logging you in...');
+            } catch (error) {
+                console.error(error);
+                alert(`❌ Signup failed: ${error.message}`);
+            }
+        });
+
+        // Login Logic
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const email = loginEmailInput.value.trim();
+            const password = loginPasswordInput.value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                alert(`❌ Login failed: ${error.message}`);
+            }
+            loginPasswordInput.value = '';
+        });
+
+        // Logout Logic
+        logoutButton.addEventListener('click', async function() {
+            try {
+                await auth.signOut();
+                alert('Logged out successfully.');
+            } catch (error) {
+                console.error("Logout error:", error);
+                alert("Logout failed. Try refreshing the page.");
+            }
+        });
+
+        // Post/Tweet Functionality
+        document.getElementById('post-button').addEventListener('click', async function() {
+            const postTextarea = document.getElementById('post-text');
+            const content = postTextarea.value.trim();
+
+            if (!auth.currentUser || !currentUserData.displayName) {
+                alert('🚨 Profile must be created first! Go to the Profile tab.');
+                showSection('profile-content');
+                return;
+            }
+            if (content === '') {
+                alert('Please enter some text to post.');
+                return;
+            }
+
+            try {
+                await tweetsCollection.add({
+                    uid: auth.currentUser.uid,
+                    displayName: currentUserData.displayName,
+                    avatar: currentUserData.avatar,
+                    content: content,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                postTextarea.value = '';
+            } catch (error) {
+                console.error("Error posting tweet:", error);
+                alert("Failed to post tweet.");
+            }
+        });
+
+        // --- Profile Management Logic ---
+        
+        // 1. Change Display Name (Mandatory Creation Step + 15-day lock)
+        saveNameButton.addEventListener('click', async function() {
+            const newName = newNameInput.value.trim();
+            
+            if (saveNameButton.disabled) {
+                 alert('❌ Name change is temporarily locked.');
+                 return;
+            }
+            if (!newName) {
+                alert('❗ Please enter a valid name.');
+                return;
+            }
+            
+            try {
+                const payload = {
+                    displayName: newName,
+                    lastChangeTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await usersCollection.doc(auth.currentUser.uid).update(payload);
+
+                alert(`✅ Profile name updated to: ${newName}`);
+                
+                const wasIncomplete = !currentUserData.displayName;
+                await updateProfileDisplay();
+
+                if (wasIncomplete) {
+                    alert('🎉 Profile created! Welcome to the Home Feed.');
+                    showSection('home-content');
+                }
+                newNameInput.value = '';
+            } catch (error) {
+                console.error("Error updating name:", error);
+                alert("Failed to update profile name.");
+            }
+        });
+        
+        // 2. Change Profile Picture (FIXED LOGIC)
+        profilePicUpload.addEventListener('change', async function(event) {
+            const file = event.target.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const avatarUrl = e.target.result;
+                    
+                    profileAvatar.src = avatarUrl;
+                    
+                    try {
+                        await usersCollection.doc(auth.currentUser.uid).update({ avatar: avatarUrl });
+                        
+                        currentUserData.avatar = avatarUrl; 
+                        alert('✅ Picture updated successfully! (Local Data URL saved to profile)');
+                    } catch (error) {
+                        console.error("Error saving avatar URL:", error);
+                        alert("Failed to save avatar link to profile.");
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 3. Change Password
+        savePasswordButton.addEventListener('click', async function() {
+            const newPass = newPasswordInput.value;
+            const confirmPass = confirmPasswordInput.value;
+
+            if (newPass.length < 6) {
+                alert('❌ Error: New password must be at least 6 characters long.');
+                return;
+            } else if (newPass !== confirmPass) {
+                alert('❌ Error: New password and confirmation do not match.');
+                return;
+            }
+
+            try {
+                await auth.currentUser.updatePassword(newPass);
+                alert('✅ Password changed successfully!');
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+            } catch (error) {
+                alert(`❌ Failed to change password. Please log out and log in again to perform this action. Error: ${error.message}`);
+            }
+        });
+        
+        // 4. Update Email
+        saveEmailButton.addEventListener('click', async function() {
+            const newEmail = newEmailInput.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!emailRegex.test(newEmail)) {
+                alert('❌ Error: Please enter a valid email address.');
+                return;
+            }
+
+            try {
+                await auth.currentUser.updateEmail(newEmail);
+                await usersCollection.doc(auth.currentUser.uid).update({ email: newEmail });
+                await updateProfileDisplay();
+                alert(`✅ Email updated successfully to: ${newEmail}`);
+                newEmailInput.value = '';
+            } catch (error) {
+                alert(`❌ Failed to change email. Please log out and log in again to perform this action. Error: ${error.message}`);
+            }
+        });
+        
+        // 5. Privacy Settings (Mock logic retained)
+        savePrivacyButton.addEventListener('click', function() {
+            alert('✅ Privacy settings saved! (Mock data)');
+        });
+
+        // --- Navigation Functionality ---
+        function showSection(targetSectionId) {
+            contentSections.forEach(section => { section.style.display = 'none'; });
+            const targetSection = document.getElementById(targetSectionId);
+            if (targetSection) { targetSection.style.display = 'block'; }
+            navLinks.forEach(nav => nav.classList.remove('active'));
+            document.querySelector(`[data-section="${targetSectionId}"]`).classList.add('active');
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const targetSectionId = this.getAttribute('data-section');
+                
+                if (targetSectionId && auth.currentUser) {
+                    if (!currentUserData.displayName && targetSectionId === 'home-content') {
+                        e.preventDefault();
+                        alert('🚨 Profile must be created first! Please complete your profile.');
+                        showSection('profile-content');
+                        return;
+                    }
+                    e.preventDefault();
+                    showSection(targetSectionId);
+
+                    if (targetSectionId === 'profile-content') {
+                        updateNameChangeLock(); 
+                    }
+                }
+            });
+        });
+
+        // --- Mock Community Data ---
+        function renderStudents() {
+            // Function kept minimal as the section was removed
+        }
+
+        function initApp() {
+            renderStudents();
+        }
+
+    </script>
+</body>
+</html>
